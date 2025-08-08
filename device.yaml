@@ -1,0 +1,770 @@
+config:
+  register_address_type: u8
+  default_byte_order: LE
+Status:
+  type: register
+  address: 0x00
+  access: RO
+  size_bits: 8
+  reset_value: 0xE0
+  description: "Device status register"
+  fields:
+    oc_detect:
+      start: 0
+      base: bool
+      description: "Overcurrent detection flag"
+    over_temp:
+      start: 1
+      base: bool
+      description: "Overtemperature detection flag"
+    diag_result:
+      start: 3
+      base: bool
+      description: "Diagnostic result flag"
+    device_id:
+      start: 5
+      end: 8
+      base: uint
+      description: "Device identifier (3=DRV2605, 4=DRV2604, 6=DRV2604L, 7=DRV2605L)"
+Mode:
+  type: register
+  address: 0x01
+  size_bits: 8
+  reset_value: 0x40
+  description: "Mode register"
+  fields:
+    mode:
+      start: 0
+      end: 3
+      base: uint
+      description: "Operating mode selection"
+      conversion:
+        name: OperatingMode
+        Internal:
+          value: 0
+          description: "Internal trigger mode"
+        ExternalEdge:
+          value: 1
+          description: "External trigger (edge mode)"
+        ExternalLevel:
+          value: 2
+          description: "External trigger (level mode)"
+        PwmOrAnalog:
+          value: 3
+          description: "PWM/Analog input mode"
+        AudioToVibe:
+          value: 4
+          description: "Audio-to-vibe mode"
+        Playback:
+          value: 5
+          description: "Real-time playback mode"
+        Diagnostics:
+          value: 6
+          description: "Diagnostics mode"
+        AutoCalibration:
+          value: 7
+          description: "Auto-calibration mode"
+    standby:
+      start: 6
+      base: bool
+      description: "Software standby mode"
+    dev_reset:
+      start: 7
+      base: bool
+      description: "Device reset bit"
+RealTimePlaybackInput:
+  type: register
+  address: 0x02
+  size_bits: 8
+  reset_value: 0x00
+  description: "Real-time playback input register"
+  fields:
+    rtp_input:
+      start: 0
+      end: 8
+      base: uint
+      description: "Real-time playback input value"
+LibrarySelection:
+  type: register
+  address: 0x03
+  size_bits: 8
+  reset_value: 0x01
+  description: "Library selection and control register"
+  fields:
+    library_sel:
+      start: 0
+      end: 3
+      base: uint
+      description: "Waveform library selection"
+      conversion:
+        name: LibrarySelection
+        Empty:
+          value: 0
+          description: "Empty"
+        A:
+          value: 1
+          description: "Library A"
+        B:
+          value: 2
+          description: "Library B"
+        C:
+          value: 3
+          description: "Library C"
+        D:
+          value: 4
+          description: "Library D"
+        E:
+          value: 5
+          description: "Library E"
+        LRA:
+          value: 6
+          description: "LRA Library"
+        F:
+          value: 7
+          description: "Library F"
+    hi_z:
+      start: 4
+      base: bool
+      description: "High-impedance state control"
+WaveformSequencer0:
+  type: register
+  address: 0x04
+  size_bits: 8
+  reset_value: 0x00
+  description: "Waveform sequencer register 0"
+  fields:
+    wav_frm_seq:
+      start: 0
+      end: 7
+      base: uint
+      description: "Waveform sequence value"
+    wait:
+      start: 7
+      base: bool
+      description: "Wait time flag"
+WaveformSequencer1:
+  type: register
+  address: 0x05
+  size_bits: 8
+  reset_value: 0x00
+  description: "Waveform sequencer register 1"
+  fields:
+    wav_frm_seq:
+      start: 0
+      end: 7
+      base: uint
+      description: "Waveform sequence value"
+    wait:
+      start: 7
+      base: bool
+      description: "Wait time flag"
+WaveformSequencer2:
+  type: register
+  address: 0x06
+  size_bits: 8
+  reset_value: 0x00
+  description: "Waveform sequencer register 2"
+  fields:
+    wav_frm_seq:
+      start: 0
+      end: 7
+      base: uint
+      description: "Waveform sequence value"
+    wait:
+      start: 7
+      base: bool
+      description: "Wait time flag"
+WaveformSequencer3:
+  type: register
+  address: 0x07
+  size_bits: 8
+  reset_value: 0x00
+  description: "Waveform sequencer register 3"
+  fields:
+    wav_frm_seq:
+      start: 0
+      end: 7
+      base: uint
+      description: "Waveform sequence value"
+    wait:
+      start: 7
+      base: bool
+      description: "Wait time flag"
+WaveformSequencer4:
+  type: register
+  address: 0x08
+  size_bits: 8
+  reset_value: 0x00
+  description: "Waveform sequencer register 4"
+  fields:
+    wav_frm_seq:
+      start: 0
+      end: 7
+      base: uint
+      description: "Waveform sequence value"
+    wait:
+      start: 7
+      base: bool
+      description: "Wait time flag"
+WaveformSequencer5:
+  type: register
+  address: 0x09
+  size_bits: 8
+  reset_value: 0x00
+  description: "Waveform sequencer register 5"
+  fields:
+    wav_frm_seq:
+      start: 0
+      end: 7
+      base: uint
+      description: "Waveform sequence value"
+    wait:
+      start: 7
+      base: bool
+      description: "Wait time flag"
+WaveformSequencer6:
+  type: register
+  address: 0x0A
+  size_bits: 8
+  reset_value: 0x00
+  description: "Waveform sequencer register 6"
+  fields:
+    wav_frm_seq:
+      start: 0
+      end: 7
+      base: uint
+      description: "Waveform sequence value"
+    wait:
+      start: 7
+      base: bool
+      description: "Wait time flag"
+WaveformSequencer7:
+  type: register
+  address: 0x0B
+  size_bits: 8
+  reset_value: 0x00
+  description: "Waveform sequencer register 7"
+  fields:
+    wav_frm_seq:
+      start: 0
+      end: 7
+      base: uint
+      description: "Waveform sequence value"
+    wait:
+      start: 7
+      base: bool
+      description: "Wait time flag"
+Go:
+  type: register
+  address: 0x0C
+  size_bits: 8
+  reset_value: 0x00
+  description: "Go register - triggers waveform playback"
+  fields:
+    go:
+      start: 0
+      base: bool
+      description: "Go bit - triggers playback or calibration"
+OverdriveTimeOffset:
+  type: register
+  address: 0x0D
+  size_bits: 8
+  reset_value: 0x00
+  description: "Overdrive time offset register"
+  fields:
+    odt:
+      start: 0
+      end: 8
+      base: uint
+      description: "Overdrive time offset value"
+SustainTimeOffsetPos:
+  type: register
+  address: 0x0E
+  size_bits: 8
+  reset_value: 0x00
+  description: "Sustain time offset positive register"
+  fields:
+    spt:
+      start: 0
+      end: 8
+      base: uint
+      description: "Sustain time positive offset value"
+SustainTimeOffsetNeg:
+  type: register
+  address: 0x0F
+  size_bits: 8
+  reset_value: 0x00
+  description: "Sustain time offset negative register"
+  fields:
+    snt:
+      start: 0
+      end: 8
+      base: uint
+      description: "Sustain time negative offset value"
+BrakeTimeOffset:
+  type: register
+  address: 0x10
+  size_bits: 8
+  reset_value: 0x00
+  description: "Brake time offset register"
+  fields:
+    brt:
+      start: 0
+      end: 8
+      base: uint
+      description: "Brake time offset value"
+AudioToVibeControl:
+  type: register
+  address: 0x11
+  size_bits: 8
+  reset_value: 0x05
+  description: "Audio-to-vibe control register"
+  fields:
+    ath_filter:
+      start: 0
+      end: 2
+      base: uint
+      description: "Audio-to-haptic filter setting"
+      conversion:
+        name: AthFilter
+        Hz100:
+          value: 0
+          description: "100 Hz filter"
+        Hz125:
+          value: 1
+          description: "125 Hz filter"
+        Hz150:
+          value: 2
+          description: "150 Hz filter"
+        Hz200:
+          value: 3
+          description: "200 Hz filter"
+    ath_peak_time:
+      start: 2
+      end: 4
+      base: uint
+      description: "Audio-to-haptic peak time setting"
+      conversion:
+        name: AthPeakTime
+        Ms10:
+          value: 0
+          description: "10 ms peak time"
+        Ms20:
+          value: 1
+          description: "20 ms peak time"
+        Ms30:
+          value: 2
+          description: "30 ms peak time"
+        Ms40:
+          value: 3
+          description: "40 ms peak time"
+AudioToVibeMinInputLevel:
+  type: register
+  address: 0x12
+  size_bits: 8
+  reset_value: 0x19
+  description: "Audio-to-vibe minimum input level register"
+  fields:
+    ath_min_input:
+      start: 0
+      end: 8
+      base: uint
+      description: "Minimum input level for audio-to-haptic"
+AudioToVibeMaxInputLevel:
+  type: register
+  address: 0x13
+  size_bits: 8
+  reset_value: 0xFF
+  description: "Audio-to-vibe maximum input level register"
+  fields:
+    ath_max_input:
+      start: 0
+      end: 8
+      base: uint
+      description: "Maximum input level for audio-to-haptic"
+AudioToVibeMinOutputDrive:
+  type: register
+  address: 0x14
+  size_bits: 8
+  reset_value: 0x19
+  description: "Audio-to-vibe minimum output drive register"
+  fields:
+    ath_min_drive:
+      start: 0
+      end: 8
+      base: uint
+      description: "Minimum output drive for audio-to-haptic"
+AudioToVibeMaxOutputDrive:
+  type: register
+  address: 0x15
+  size_bits: 8
+  reset_value: 0xFF
+  description: "Audio-to-vibe maximum output drive register"
+  fields:
+    ath_max_drive:
+      start: 0
+      end: 8
+      base: uint
+      description: "Maximum output drive for audio-to-haptic"
+RatedVoltage:
+  type: register
+  address: 0x16
+  size_bits: 8
+  reset_value: 0x3E
+  description: "Rated voltage register"
+  fields:
+    rated_voltage:
+      start: 0
+      end: 8
+      base: uint
+      description: "Rated voltage setting for actuator"
+OverdriveClampVoltage:
+  type: register
+  address: 0x17
+  size_bits: 8
+  reset_value: 0x8C
+  description: "Overdrive clamp voltage register"
+  fields:
+    od_clamp:
+      start: 0
+      end: 8
+      base: uint
+      description: "Overdrive clamp voltage setting"
+AutoCalibCompResult:
+  type: register
+  address: 0x18
+  size_bits: 8
+  reset_value: 0x0C
+  description: "Auto-calibration compensation result register"
+  fields:
+    a_cal_comp:
+      start: 0
+      end: 8
+      base: uint
+      description: "Auto-calibration compensation result"
+AutoCalibBackEmfResult:
+  type: register
+  address: 0x19
+  size_bits: 8
+  reset_value: 0x6C
+  description: "Auto-calibration back-EMF result register"
+  fields:
+    a_cal_bemf:
+      start: 0
+      end: 8
+      base: uint
+      description: "Auto-calibration back-EMF result"
+FeedbackControl:
+  type: register
+  address: 0x1A
+  size_bits: 8
+  reset_value: 0x36
+  description: "Feedback control register"
+  fields:
+    bemf_gain:
+      start: 0
+      end: 2
+      base: uint
+      description: "Back-EMF gain setting"
+    loop_gain:
+      start: 2
+      end: 4
+      base: uint
+      description: "Feedback loop gain setting"
+      conversion:
+        name: LoopGain
+        Low:
+          value: 0
+          description: "Low loop gain"
+        Medium:
+          value: 1
+          description: "Medium loop gain"
+        High:
+          value: 2
+          description: "High loop gain"
+        VeryHigh:
+          value: 3
+          description: "Very high loop gain"
+    fb_brake_factor:
+      start: 4
+      end: 7
+      base: uint
+      description: "Feedback brake factor"
+      conversion:
+        name: FbBrakeFactor
+        X1:
+          value: 0
+          description: "1x brake factor"
+        X2:
+          value: 1
+          description: "2x brake factor"
+        X3:
+          value: 2
+          description: "3x brake factor"
+        X4:
+          value: 3
+          description: "4x brake factor"
+        X6:
+          value: 4
+          description: "6x brake factor"
+        X8:
+          value: 5
+          description: "8x brake factor"
+        X16:
+          value: 6
+          description: "16x brake factor"
+        Disabled:
+          value: 7
+          description: "Braking disabled"
+    n_erm_lra:
+      start: 7
+      base: bool
+      description: "ERM/LRA selection (0=ERM, 1=LRA)"
+Control1:
+  type: register
+  address: 0x1B
+  size_bits: 8
+  reset_value: 0x93
+  description: "Control register 1"
+  fields:
+    drive_time:
+      start: 0
+      end: 5
+      base: uint
+      description: "Drive time setting"
+    ac_couple:
+      start: 5
+      base: bool
+      description: "AC coupling control"
+    startup_boost:
+      start: 7
+      base: bool
+      description: "Startup boost enable"
+Control2:
+  type: register
+  address: 0x1C
+  size_bits: 8
+  reset_value: 0xF5
+  description: "Control register 2"
+  fields:
+    idiss_time:
+      start: 0
+      end: 2
+      base: uint
+      description: "Current dissipation time"
+    blanking_time:
+      start: 2
+      end: 4
+      base: uint
+      description: "Blanking time setting"
+    sample_time:
+      start: 4
+      end: 6
+      base: uint
+      description: "Sample time setting"
+      conversion:
+        name: SampleTime
+        Us150:
+          value: 0
+          description: "150 μs sample time"
+        Us200:
+          value: 1
+          description: "200 μs sample time"
+        Us250:
+          value: 2
+          description: "250 μs sample time"
+        Us300:
+          value: 3
+          description: "300 μs sample time"
+    brake_stabilizer:
+      start: 6
+      base: bool
+      description: "Brake stabilizer enable"
+    bidir_input:
+      start: 7
+      base: bool
+      description: "Bidirectional input mode"
+Control3:
+  type: register
+  address: 0x1D
+  size_bits: 8
+  reset_value: 0xA0
+  description: "Control register 3"
+  fields:
+    lra_open_loop:
+      start: 0
+      base: bool
+      description: "LRA open loop mode"
+    n_pwm_analog:
+      start: 1
+      base: bool
+      description: "PWM/Analog input selection (0=PWM, 1=Analog)"
+    lra_drive_mode:
+      start: 2
+      base: bool
+      description: "LRA drive mode (0=Once per cycle, 1=Twice per cycle)"
+    data_format_rtp:
+      start: 3
+      base: bool
+      description: "Data format for RTP (0=Signed, 1=Unsigned)"
+    supply_comp_dis:
+      start: 4
+      base: bool
+      description: "Supply compensation disable (0=Enabled, 1=Disabled)"
+    erm_open_loop:
+      start: 5
+      base: bool
+      description: "ERM open loop mode (0=Closed loop, 1=Open loop)"
+    ng_thresh:
+      start: 6
+      end: 8
+      base: uint
+      description: "Noise gate threshold"
+      conversion:
+        name: NoiseGateThreshold
+        Disabled:
+          value: 0
+          description: "Noise gate disabled"
+        TwoPercent:
+          value: 1
+          description: "2% threshold"
+        FourPercent:
+          value: 2
+          description: "4% threshold"
+        EightPercent:
+          value: 3
+          description: "8% threshold"
+Control4:
+  type: register
+  address: 0x1E
+  size_bits: 8
+  reset_value: 0x20
+  description: "Control register 4"
+  fields:
+    otp_program:
+      start: 0
+      base: bool
+      description: "OTP program bit"
+    otp_status:
+      start: 2
+      base: bool
+      access: RO
+      description: "OTP status bit"
+    auto_cal_time:
+      start: 4
+      end: 6
+      base: uint
+      description: "Auto-calibration time setting"
+      conversion:
+        name: AutoCalibTime
+        Ms150to350:
+          value: 0
+          description: "150-350 ms calibration time"
+        Ms250to450:
+          value: 1
+          description: "250-450 ms calibration time"
+        Ms500to700:
+          value: 2
+          description: "500-700 ms calibration time"
+        Ms1000to1200:
+          value: 3
+          description: "1000-1200 ms calibration time"
+    zc_det_time:
+      start: 6
+      end: 8
+      base: uint
+      description: "Zero-crossing detection time"
+      conversion:
+        name: ZeroCrossTime
+        Us100:
+          value: 0
+          description: "100 μs detection time"
+        Us200:
+          value: 1
+          description: "200 μs detection time"
+        Us300:
+          value: 2
+          description: "300 μs detection time"
+        Us390:
+          value: 3
+          description: "390 μs detection time"
+Control5:
+  type: register
+  address: 0x1F
+  size_bits: 8
+  reset_value: 0x80
+  description: "Control register 5"
+  fields:
+    idiss_time:
+      start: 0
+      end: 2
+      base: uint
+      description: "Current dissipation time"
+    blanking_time:
+      start: 2
+      end: 4
+      base: uint
+      description: "Blanking time setting"
+    playback_interval:
+      start: 4
+      base: bool
+      description: "Playback interval setting (0=5ms, 1=1ms)"
+    lra_auto_open_loop:
+      start: 5
+      base: bool
+      description: "LRA auto open loop enable"
+    auto_ol_cnt:
+      start: 6
+      end: 8
+      base: uint
+      description: "Auto open loop count"
+      conversion:
+        name: AutoOpenLoopCnt
+        X3:
+          value: 0
+          description: "3x auto open loop count"
+        X4:
+          value: 1
+          description: "4x auto open loop count"
+        X5:
+          value: 2
+          description: "5x auto open loop count"
+        X6:
+          value: 3
+          description: "6x auto open loop count"
+LraOpenLoopPeriod:
+  type: register
+  address: 0x20
+  size_bits: 8
+  reset_value: 0x33
+  description: "LRA open loop period register"
+  fields:
+    ol_lra_period:
+      start: 0
+      end: 7
+      base: uint
+      description: "Open loop LRA period value"
+VbatVoltageMonitor:
+  type: register
+  address: 0x21
+  size_bits: 8
+  reset_value: 0x00
+  description: "VBAT voltage monitor register"
+  fields:
+    vbat:
+      start: 0
+      end: 8
+      base: uint
+      description: "Battery voltage measurement"
+LraResonancePeriod:
+  type: register
+  address: 0x22
+  size_bits: 8
+  reset_value: 0x00
+  description: "LRA resonance period register"
+  fields:
+    lra_period:
+      start: 0
+      end: 8
+      base: uint
+      description: "LRA resonance period measurement"

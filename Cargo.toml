@@ -1,0 +1,33 @@
+[package]
+name = "drv260x"
+authors = ["Preston Peranich"]
+version = "0.1.0"
+edition = "2021"
+description = "Embedded driver for the TI DRV260X Haptic Driver family (DRV2604, DRV2604L, DRV2605, DRV2605L)."
+documentation = "https://docs.rs/drv260x"
+repository = "https://github.com/iscoe/dc-mini-sw"
+license = "Apache-2.0 OR MIT"
+keywords = ["embedded-hal-driver", "drv2605", "drv2604", "haptic", "drv260x"]
+categories = ["no-std", "embedded", "asynchronous", "hardware-support"]
+
+[features]
+default = []
+async = []
+drv2605 = []
+drv2605l = []
+drv2604 = []
+drv2604l = []
+defmt-03 = [
+  "embedded-hal/defmt-03",
+  "embedded-hal-async/defmt-03",
+  "dep:defmt",
+]
+
+[dependencies]
+cfg-if = "1.0"
+defmt = { version = "1.0", optional = true }
+device-driver = "1.0"
+embedded-hal = "1.0"
+embedded-hal-async = "1.0"
+heapless = "0.8"
+num_enum = { version = "0.7", default-features = false }
