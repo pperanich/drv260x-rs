@@ -8,22 +8,31 @@ A platform-agnostic Rust driver for the Texas Instruments DRV260X haptic driver 
 
 ## Supported Devices
 
-| Device | Description | Feature Flag | Status |
-|-----------|--------------------------------------------------|--------------|--------|
-| DRV2605 | Haptic driver with licensed ROM library | `drv2605` | ✅ |
-| DRV2605L | Low-voltage version of DRV2605 | `drv2605l` | ✅ |
-| DRV2604 | Haptic driver with RAM (no ROM library) | `drv2604` | ✅ |
-| DRV2604L | Low-voltage version of DRV2604 | `drv2604l` | ✅ |
+| Device | Description | Feature Flag | ROM Library | Status |
+|-----------|--------------------------------------------------|--------------|-------------|--------|
+| DRV2605 | Haptic driver with licensed ROM library | `drv2605` | ✅ Yes | ✅ |
+| DRV2605L | Low-voltage version of DRV2605 | `drv2605l` | ✅ Yes | ✅ |
+| DRV2604 | Haptic driver with RAM (no ROM library) | `drv2604` | ❌ No | ✅ |
+| DRV2604L | Low-voltage version of DRV2604 | `drv2604l` | ❌ No | ✅ |
+
+**Important**: You must specify the correct feature flag for your chip variant, as this determines:
+
+- Available registers (some registers only exist on specific variants)
+- ROM library availability (Effect enum only available on DRV2605/DRV2605L)
+- Voltage-specific default configurations
 
 ## Features
 
 - **🚀 High-level API** - Easy-to-use driver with comprehensive error handling
 - **⚡ Async/sync support** - Full async/await support with feature gating
-- **🎯 Multi-chip support** - Feature flags for all DRV260X variants
+- **🎯 Multi-chip support** - Auto-detection for all DRV260X variants
 - **📡 Multiple operating modes** - Internal/external trigger, PWM, audio-to-vibe, real-time playback
 - **🔧 Auto-calibration** - Support for both ERM and LRA actuator calibration
 - **🩺 Diagnostics** - Built-in actuator health monitoring
 - **🎼 Waveform sequencing** - Complex haptic pattern creation with up to 8 effects
+- **🎵 Predefined effects library** - 123 built-in haptic effects (DRV2605/DRV2605L only)
+- **⏰ Waveform timing control** - Fine-tuning of library effect timing
+- **🎧 Audio-to-vibe configuration** - Advanced audio-to-haptic conversion
 - **📊 Real-time control** - Direct amplitude control for custom haptic effects
 - **🔋 Power management** - Standby modes and power optimization
 - **🦀 `#![no_std]` compatible** - Suitable for embedded environments
@@ -34,19 +43,26 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-drv260x = "0.1"
+# For DRV2605 with ROM library
+drv260x = { version = "0.1", features = ["drv2605"] }
 
-# For async support
-# drv260x = { version = "0.1", features = ["async"] }
+# For DRV2605L with ROM library 
+drv260x = { version = "0.1", features = ["drv2605l"] }
 
-# For specific chip variants (optional)
-# drv260x = { version = "0.1", features = ["drv2605l"] }
+# For DRV2604 (RAM-only, no ROM library)
+drv260x = { version = "0.1", features = ["drv2604"] }
+
+# For DRV2604L (RAM-only, no ROM library)
+drv260x = { version = "0.1", features = ["drv2604l"] }
+
+# Combine with async support
+# drv260x = { version = "0.1", features = ["drv2605", "async"] }
 ```
 
 ### Basic Usage
 
 ```rust
-use drv260x::{Drv260x, OperatingMode, WaveformEntry};
+use drv260x::{Drv260x, OperatingMode, Effect};
 use embedded_hal::i2c::I2c;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -62,8 +78,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Set operating mode
     haptic.set_mode(OperatingMode::Internal)?;
     
-    // Play a single haptic effect (effect ID 1 = strong click)
-    haptic.set_single_effect(1)?;
+    // Play a predefined haptic effect
+    haptic.set_single_effect_enum(Effect::StrongClick100)?;
     haptic.go()?;
     
     // Wait for completion
@@ -75,22 +91,60 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-### Complex Waveform Sequences
+### Using Predefined Effects (DRV2605/DRV2605L only)
 
 ```rust
+// Only available with "drv2605" or "drv2605l" feature flags
+#[cfg(any(feature = "drv2605", feature = "drv2605l"))]
+{
+    use drv260x::{Effect, WaveformEntry};
+    
+    // Play individual predefined effects
+    haptic.set_single_effect_enum(Effect::StrongClick100)?;
+    haptic.go()?;
+    
+    // Create complex sequences with predefined effects
+    let sequence = [
+        WaveformEntry::from(Effect::SharpClick100),
+        WaveformEntry::wait(5),             // Wait 50ms (5 * 10ms)
+        WaveformEntry::from(Effect::Buzz1_100),
+        WaveformEntry::wait(2),             // Wait 20ms
+        WaveformEntry::from(Effect::PulsingStrong1_100),
+        WaveformEntry::stop(),              // End sequence
+    ];
+    
+    haptic.set_waveform_sequence(&sequence)?;
+    haptic.go()?;
+}
+```
+
+### Custom Waveforms (All Devices)
+
+```rust
+// Available on all devices - use custom amplitude values for DRV2604/DRV2604L
 use drv260x::WaveformEntry;
 
-// Create a complex haptic pattern
+// For DRV2604/DRV2604L: use custom amplitude values (1-127)
+// For DRV2605/DRV2605L: can use both ROM effects (1-123) and custom amplitudes
 let sequence = [
-    WaveformEntry::effect(1),           // Strong click
-    WaveformEntry::wait(5),             // Wait 50ms (5 * 10ms)
-    WaveformEntry::effect(47),          // Buzz
-    WaveformEntry::wait(2),             // Wait 20ms
-    WaveformEntry::effect(14),          // Strong buzz
+    WaveformEntry::effect(100),         // Custom amplitude or ROM effect
+    WaveformEntry::wait(5),             // Wait 50ms
+    WaveformEntry::effect(80),          // Different amplitude
     WaveformEntry::stop(),              // End sequence
 ];
 
 haptic.set_waveform_sequence(&sequence)?;
+haptic.go()?;
+```
+
+### Convenient ERM Initialization
+
+```rust
+// One-line setup for ERM actuators in open-loop mode
+haptic.init_open_loop_erm()?;
+
+// Now ready to play effects
+haptic.set_single_effect_enum(Effect::StrongClick100)?;
 haptic.go()?;
 ```
 
@@ -101,12 +155,27 @@ Enable the `async` feature and use the `_async` methods:
 ```rust
 use drv260x::{Drv260x, OperatingMode};
 
+#[cfg(any(feature = "drv2605", feature = "drv2605l"))]
+use drv260x::Effect;
+
 async fn haptic_demo(i2c: impl embedded_hal_async::i2c::I2c) -> Result<(), drv260x::Error<_>> {
     let mut haptic = Drv260x::new(i2c);
     
-    haptic.init_async().await?;
-    haptic.set_mode_async(OperatingMode::Internal).await?;
-    haptic.set_single_effect_async(1).await?;
+    // Convenient async ERM initialization
+    haptic.init_open_loop_erm_async().await?;
+    
+    // Play predefined effects (ROM devices only)
+    #[cfg(any(feature = "drv2605", feature = "drv2605l"))]
+    {
+        haptic.set_single_effect_enum_async(Effect::StrongClick100).await?;
+    }
+    
+    // Custom amplitude (all devices)
+    #[cfg(any(feature = "drv2604", feature = "drv2604l"))]
+    {
+        haptic.set_single_effect_async(100).await?; // Custom amplitude
+    }
+    
     haptic.go_async().await?;
     
     Ok(())
@@ -158,18 +227,33 @@ drv260x/
 ├── device.yaml          # Register definitions and device specification
 ├── build.rs             # Build script for code generation
 ├── src/
-│   ├── lib.rs          # High-level driver API
-│   ├── ll.rs           # Low-level device interface
-└── ROADMAP.md          # Future feature development roadmap
+│   ├── lib.rs           # Main driver structure and exports
+│   ├── sync_impl.rs     # Synchronous method implementations
+│   ├── async_impl.rs    # Asynchronous method implementations
+│   ├── effects.rs       # Effect enum and waveform utilities
+│   ├── ll.rs            # Low-level device interface
+├── examples/
+│   └── effects_demo.rs  # Effect library demonstration
+└── ROADMAP.md           # Future feature development roadmap
 ```
 
 ### High-Level vs Low-Level APIs
 
-#### `lib.rs` - High-Level Driver API
+#### High-Level Driver API
 
-The high-level API provides:
+The high-level API is split across multiple modules for maintainability:
+
+**`lib.rs`** - Core driver structure, error types, and module exports
+**`sync_impl.rs`** - All synchronous method implementations
+**`async_impl.rs`** - All asynchronous method implementations (when `async` feature is enabled)
+**`effects.rs`** - Predefined effects enum and waveform utilities (DRV2605/DRV2605L only)
+
+The API provides:
 
 - **User-friendly methods** with descriptive names and comprehensive documentation
+- **Predefined effects library** with 123 built-in haptic effects
+- **Timing control methods** for fine-tuning waveform characteristics
+- **Audio-to-vibe configuration** for audio-to-haptic conversion
 - **Error handling** with meaningful error types and context
 - **Device state tracking** to cache configuration and optimize I2C transactions
 - **Input validation** to prevent invalid configurations
@@ -179,8 +263,15 @@ The high-level API provides:
 Example high-level operations:
 
 ```rust
-haptic.init()?;                              // Device initialization with validation
-haptic.set_single_effect(1)?;               // Simple effect playback
+haptic.init_open_loop_erm()?;                // Convenient ERM initialization
+
+// Predefined effects (DRV2605/DRV2605L only)
+#[cfg(any(feature = "drv2605", feature = "drv2605l"))]
+haptic.set_single_effect_enum(Effect::StrongClick100)?;
+
+// Custom amplitudes (all devices)
+haptic.set_single_effect(100)?;             // Custom amplitude value
+haptic.set_overdrive_time_offset(5)?;       // Fine-tune timing
 haptic.start_auto_calibration()?;           // Automated calibration workflow
 let status = haptic.get_status()?;          // Parsed status information
 ```
@@ -315,17 +406,24 @@ When enabled:
 #### Chip Variant Features
 
 ```toml
-drv260x = { version = "0.1", features = ["drv2605l"] }
+drv260x = { version = "0.1", features = ["drv2605"] }
 ```
 
-Currently implemented variants:
+**Required Feature Flags:**
 
-- `drv2605` - Standard voltage DRV2605
-- `drv2605l` - Low voltage DRV2605L
-- `drv2604` - Standard voltage DRV2604
-- `drv2604l` - Low voltage DRV2604L
+- `drv2605` - Standard voltage DRV2605 with ROM library
+- `drv2605l` - Low voltage DRV2605L with ROM library
+- `drv2604` - Standard voltage DRV2604 with RAM only
+- `drv2604l` - Low voltage DRV2604L with RAM only
 
-**Note**: Register differences between variants will be implemented using `cfg` attributes in `device.yaml` as the need arises.
+**Feature Flag Effects:**
+
+- **ROM Library Access**: Effect enum and `set_single_effect_enum()` methods are only available with `drv2605`/`drv2605l` features
+- **Register Availability**: Some registers and configuration options are chip-specific
+- **Default Configurations**: Voltage-specific defaults for calibration and operation
+- **Compile-time Safety**: Prevents using ROM library methods on RAM-only devices
+
+**Device ID Validation**: The driver validates the detected device ID matches your selected feature flag during initialization.
 
 #### Debug and Logging
 
@@ -385,12 +483,9 @@ pub enum Error<E> {
 
 See the `examples/` directory for complete examples:
 
-- `basic.rs` - Simple haptic effect playback
-- `sequences.rs` - Complex waveform sequencing
-- `calibration.rs` - Auto-calibration workflow
-- `real_time.rs` - Real-time playback mode
-- `audio_to_vibe.rs` - Audio-to-haptic conversion
-- `async_demo.rs` - Async/await usage patterns
+- `effects_demo.rs` - Comprehensive demonstration of the Effect enum, waveform sequencing, timing control, and audio-to-vibe configuration
+
+For more usage examples, see the documentation and the individual method examples in the API documentation.
 
 ## Development
 
@@ -412,12 +507,14 @@ cargo hack check --feature-powerset
 
 ### Contributing
 
-This crate follows the roadmap outlined in [`ROADMAP.md`](ROADMAP.md). Priority features include:
+This crate follows the roadmap outlined in [`ROADMAP.md`](ROADMAP.md). Recently completed features include:
 
-1. **Haptic Effects Library** - Predefined effects from the TI ROM library
-1. **Advanced Calibration** - Enhanced auto-calibration with validation
-1. **Real-time Utilities** - Waveform generation and streaming
-1. **Audio-to-Vibe** - Advanced audio processing configuration
+1. **✅ Haptic Effects Library** - Complete 123-effect enum from TI ROM library (DRV2605/DRV2605L)
+1. **✅ Waveform Timing Control** - Fine-tuning methods for library effects
+1. **✅ Audio-to-Vibe Configuration** - Audio-to-haptic conversion methods
+1. **✅ Modular Architecture** - Clean separation of sync/async implementations
+
+See ROADMAP.md for upcoming priority features.
 
 ### Testing
 
