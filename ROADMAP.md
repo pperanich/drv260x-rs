@@ -7,7 +7,7 @@ This document outlines the planned features and enhancements for the DRV260X hap
 - [x] **Basic Register Access**: Complete device.yaml definition with all registers
 - [x] **High-Level API Structure**: Core driver struct with initialization and basic controls
 - [x] **Async Support**: Full async/await support with feature gating
-- [x] **Multi-Chip Support**: Feature flags for DRV2604, DRV2604L, DRV2605, DRV2605L variants
+- [x] **Multi-Chip Support**: Feature flags for DRV2604, DRV2604L, DRV2605, DRV2605L variants with compile-time API gating
 - [x] **Waveform Sequencing**: Support for 8-entry waveform sequences with wait states
 - [x] **Operating Modes**: All 8 operating modes (internal trigger, external trigger, PWM, audio-to-vibe, RTP, diagnostics, auto-calibration)
 - [x] **Device Management**: Initialization, reset, standby, status monitoring
@@ -138,71 +138,44 @@ src/
 
 ### 0. IC Compatibility Audit and Feature Gating
 
-**Status**: Not Started ❌\
+**Status**: In Progress 🔧\
 **Complexity**: High\
-**Target**: Q1 2025\
 **Description**: Comprehensive audit and update of device.yaml and high-level API for multi-chip compatibility.
 
-**Current Issue**: The crate was primarily designed for the DRV2605L and needs systematic review for compatibility across all DRV260X variants.
+#### Completed ✅
 
-**Required Work**:
+- [x] **Feature-gate ROM library methods**: `Effect` enum, `set_library`, `set_single_effect_enum`, audio-to-vibe methods gated behind `drv2605`/`drv2605l`
+- [x] **Compile-time device selection**: `compile_error!` when no device feature selected
+- [x] **Device ID validation**: `init()` / `init_async()` validate against feature-specific expected device ID
+- [x] **Compilation tests**: All feature flag combinations (`drv2604`, `drv2604l`, `drv2605`, `drv2605l`, `async` combos) compile and pass
+- [x] **Cross-compilation**: All feature combinations build correctly
+- [x] **API availability**: ROM/audio-to-vibe methods only available with `drv2605`/`drv2605l`
 
-#### Device Register Compatibility
+#### Remaining Work
+
+##### Device Register Compatibility
 
 - [ ] **Audit device.yaml**: Review all register definitions against datasheets for DRV2604, DRV2604L, DRV2605, DRV2605L
-- [ ] **Identify chip-specific registers**: Map which registers exist on which variants
-- [ ] **Add conditional register definitions**: Use `#[cfg(feature = "...")]` attributes in device.yaml
+- [ ] **Identify chip-specific registers**: Map which registers exist on which variants (e.g., Control5/LRA OL Period on L-variants, RAM on DRV2604/DRV2604L)
+- [ ] **Add conditional register definitions**: Use `#[cfg(feature = "...")]` attributes in device.yaml if supported, or gate at API level
 - [ ] **Validate register address differences**: Ensure no register conflicts between variants
 
-#### High-Level API Compatibility
+##### Calibration and Timing
 
-- [ ] **Feature-gate ROM library methods**: Ensure Effect enum and related methods are only available for DRV2605/DRV2605L
 - [ ] **Audit calibration parameters**: Verify voltage ranges and defaults for standard vs low-voltage variants
 - [ ] **Review timing parameters**: Check if timing constants differ between chip variants
 - [ ] **Validate operating mode support**: Confirm all modes are available on all variants
 
-#### Implementation Strategy
-
-```rust
-// Example feature gating for ROM library
-#[cfg(any(feature = "drv2605", feature = "drv2605l"))]
-impl<I2C> Drv260x<I2C> {
-    pub fn set_single_effect_enum(&mut self, effect: Effect) -> Result<(), Error<E>> {
-        // Only available on ROM devices
-    }
-}
-
-// Example conditional register access
-#[cfg(feature = "drv2605")]
-pub struct StandardVoltageConfig { /* ... */ }
-
-#[cfg(any(feature = "drv2605l", feature = "drv2604l"))]
-pub struct LowVoltageConfig { /* ... */ }
-```
-
-#### Testing Requirements
-
-- [ ] **Compilation tests**: Verify each feature flag compiles correctly
-- [ ] **API availability tests**: Confirm ROM methods are only available with appropriate features
-- [ ] **Hardware validation**: Test on actual DRV2604, DRV2604L, DRV2605, DRV2605L hardware
-- [ ] **Cross-compilation**: Ensure all feature combinations build correctly
-
-#### Documentation Updates
+##### Documentation
 
 - [ ] **Update README**: Clarify chip-specific feature requirements
 - [ ] **API documentation**: Add chip compatibility notes to all methods
 - [ ] **Examples**: Create chip-specific usage examples
 - [ ] **Migration guide**: Document differences for users switching between variants
 
-**Success Criteria**:
+##### Testing
 
-- All four DRV260X variants fully supported with appropriate feature gating
-- ROM library methods only available on DRV2605/DRV2605L
-- Device.yaml accurately reflects each chip's register map
-- Comprehensive testing on all supported hardware variants
-- Clear documentation of chip-specific capabilities and limitations
-
-**Dependencies**: This work blocks proper multi-chip support and should be completed before adding new high-level features.
+- [ ] **Hardware validation**: Test on actual DRV2604, DRV2604L, DRV2605, DRV2605L hardware
 
 ## High-Priority Features 🚀
 
@@ -369,7 +342,7 @@ This roadmap is a living document. The recent major milestone of implementing th
 
 **Priority areas for contribution**:
 
-1. **🔥 IC Compatibility Audit**: Multi-chip register and API compatibility (CRITICAL)
+1. **🔥 IC Compatibility Audit (remaining)**: device.yaml register audit, voltage/timing parameter validation
 1. **Advanced Calibration**: Enhanced calibration workflows and validation
 1. **RTP Utilities**: Waveform generation and streaming capabilities
 1. **Effect Metadata**: Adding categorization and descriptions to effects
@@ -393,5 +366,7 @@ ______________________________________________________________________
 - ✅ Waveform timing control system
 - ✅ Audio-to-vibe configuration API
 - ✅ Comprehensive async/sync API parity (70+ methods)
+- ✅ Compile-time feature gating for all four device variants (Feb 2025)
+- ✅ Device ID validation per feature-selected variant (Feb 2025)
 
 The driver now provides a complete, production-ready foundation for haptic applications with both basic and advanced use cases covered.

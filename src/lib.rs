@@ -23,12 +23,10 @@
 //!
 //! ## Quick Start
 //!
-//! ```rust,no_run
-//! use drv260x::{Drv260x, OperatingMode, Effect};
+//! ```rust,ignore
+//! use drv260x::{Drv260x, OperatingMode};
 //! use embedded_hal::i2c::I2c;
 //!
-//! # fn main() {
-//! # let i2c = embedded_hal_mock::eh1::i2c::Mock::new(&[]);
 //! let mut haptic = Drv260x::new(i2c);
 //!
 //! // Initialize the driver
@@ -37,10 +35,13 @@
 //! // Set operating mode to internal trigger
 //! haptic.set_mode(OperatingMode::Internal).unwrap();
 //!
-//! // Play a predefined effect
-//! haptic.set_single_effect_enum(Effect::StrongClick100).unwrap();
+//! // Play an effect by raw ID (works on all variants)
+//! haptic.set_single_effect(1).unwrap();
 //! haptic.go().unwrap();
-//! # }
+//!
+//! // On DRV2605/DRV2605L, use the predefined Effect enum:
+//! // use drv260x::Effect;
+//! // haptic.set_single_effect_enum(Effect::StrongClick100).unwrap();
 //! ```
 //!
 //! ## Async Usage
@@ -57,6 +58,16 @@
 #![no_std]
 #![deny(missing_docs)]
 
+#[cfg(not(any(
+    feature = "drv2604",
+    feature = "drv2604l",
+    feature = "drv2605",
+    feature = "drv2605l"
+)))]
+compile_error!(
+    "Exactly one device feature must be enabled: drv2604, drv2604l, drv2605, or drv2605l"
+);
+
 // Module declarations
 #[cfg(feature = "async")]
 mod async_impl;
@@ -66,12 +77,19 @@ mod sync_impl;
 
 // Re-export the low-level types from ll module
 pub use ll::{
-    AthFilter, AthPeakTime, AutoCalibTime, AutoOpenLoopCnt, FbBrakeFactor, LibrarySelection,
-    LoopGain, NoiseGateThreshold, OperatingMode, SampleTime, ZeroCrossTime,
+    AutoCalibTime, AutoOpenLoopCnt, FbBrakeFactor, LoopGain, NoiseGateThreshold, OperatingMode,
+    SampleTime, ZeroCrossTime,
 };
 
+// Re-export ROM-only types (audio-to-vibe, library selection)
+#[cfg(any(feature = "drv2605", feature = "drv2605l"))]
+pub use ll::{AthFilter, AthPeakTime, LibrarySelection};
+
 // Re-export the effects and waveform types from effects module
-pub use effects::{Effect, WaveformEntry};
+pub use effects::WaveformEntry;
+
+#[cfg(any(feature = "drv2605", feature = "drv2605l"))]
+pub use effects::Effect;
 
 /// I2C address of the DRV260X family
 pub const I2C_ADDRESS: u8 = ll::I2C_ADDRESS;
@@ -84,8 +102,12 @@ pub struct StatusInfo {
     pub overcurrent_detected: bool,
     /// Overtemperature detection flag
     pub overtemperature_detected: bool,
+    /// Feedback status (DRV2604/DRV2605 only, reserved on L-variants)
+    pub feedback_status: bool,
     /// Diagnostic result flag (meaning depends on last operation)
     pub diagnostic_result: bool,
+    /// Illegal address detection flag (DRV2604/DRV2604L only, reserved on DRV2605/DRV2605L)
+    pub illegal_address: bool,
     /// Device identifier (3=DRV2605, 4=DRV2604, 6=DRV2604L, 7=DRV2605L)
     pub device_id: u8,
 }

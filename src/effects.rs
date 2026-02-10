@@ -9,6 +9,9 @@
 /// These effects are pre-programmed waveforms stored in the device's ROM.
 /// Each effect has a specific intensity and characteristic designed for
 /// different haptic feedback scenarios.
+///
+/// Only available on DRV2605 and DRV2605L variants which have a ROM library.
+#[cfg(any(feature = "drv2605", feature = "drv2605l"))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[cfg_attr(feature = "defmt-03", derive(defmt::Format))]
 #[repr(u8)]
@@ -281,6 +284,9 @@ impl WaveformEntry {
     }
 
     /// Create a new waveform entry for a predefined effect
+    ///
+    /// Only available on DRV2605 and DRV2605L variants which have a ROM library.
+    #[cfg(any(feature = "drv2605", feature = "drv2605l"))]
     pub fn effect_from_enum(effect: Effect) -> Self {
         Self {
             value: effect as u8,
@@ -305,6 +311,7 @@ impl WaveformEntry {
     }
 }
 
+#[cfg(any(feature = "drv2605", feature = "drv2605l"))]
 impl From<Effect> for WaveformEntry {
     fn from(effect: Effect) -> Self {
         Self::effect_from_enum(effect)

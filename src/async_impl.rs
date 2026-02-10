@@ -3,9 +3,25 @@
 //! This module contains all the asynchronous methods for the DRV260X haptic driver.
 //! All methods follow the same patterns as the synchronous versions but use async/await.
 
-use crate::ll::{AthFilter, AthPeakTime, FbBrakeFactor, LibrarySelection, LoopGain, OperatingMode};
-use crate::{Drv260x, Effect, Error, StatusInfo, WaveformEntry};
+use crate::ll::{FbBrakeFactor, LoopGain, OperatingMode};
+#[cfg(any(feature = "drv2605", feature = "drv2605l"))]
+use crate::ll::{AthFilter, AthPeakTime, LibrarySelection};
+use crate::{Drv260x, Error, StatusInfo, WaveformEntry};
+#[cfg(any(feature = "drv2605", feature = "drv2605l"))]
+use crate::Effect;
 use embedded_hal_async::i2c::I2c as AsyncI2c;
+
+cfg_if::cfg_if! {
+    if #[cfg(feature = "drv2604")] {
+        const EXPECTED_DEVICE_ID: u8 = 4;
+    } else if #[cfg(feature = "drv2604l")] {
+        const EXPECTED_DEVICE_ID: u8 = 6;
+    } else if #[cfg(feature = "drv2605")] {
+        const EXPECTED_DEVICE_ID: u8 = 3;
+    } else if #[cfg(feature = "drv2605l")] {
+        const EXPECTED_DEVICE_ID: u8 = 7;
+    }
+}
 
 #[cfg(feature = "async")]
 impl<I2C, E> Drv260x<I2C>
@@ -18,15 +34,11 @@ where
         let status = self.device.status().read_async().await?;
         let device_id = status.device_id();
 
-        // Valid device IDs: 3=DRV2605, 4=DRV2604, 6=DRV2604L, 7=DRV2605L
-        match device_id {
-            3 | 4 | 6 | 7 => {}
-            _ => {
-                return Err(Error::InvalidDeviceId {
-                    expected: 3, // Use DRV2605 as example
-                    found: device_id,
-                });
-            }
+        if device_id != EXPECTED_DEVICE_ID {
+            return Err(Error::InvalidDeviceId {
+                expected: EXPECTED_DEVICE_ID,
+                found: device_id,
+            });
         }
 
         // Clear standby mode
@@ -69,7 +81,9 @@ where
         Ok(StatusInfo {
             overcurrent_detected: status.oc_detect(),
             overtemperature_detected: status.over_temp(),
+            feedback_status: status.fb_sts(),
             diagnostic_result: status.diag_result(),
+            illegal_address: status.illegal_addr(),
             device_id: status.device_id(),
         })
     }
@@ -108,15 +122,6 @@ where
 
         // Clear cached state after reset
         self.current_mode = None;
-        Ok(())
-    }
-
-    /// Set library selection (async version)
-    pub async fn set_library_async(&mut self, library: LibrarySelection) -> Result<(), Error<E>> {
-        self.device
-            .library_selection()
-            .modify_async(|reg| reg.set_library_sel(library))
-            .await?;
         Ok(())
     }
 
@@ -176,12 +181,6 @@ where
     /// Set a single effect in the first sequencer slot (async version)
     pub async fn set_single_effect_async(&mut self, effect_id: u8) -> Result<(), Error<E>> {
         let sequence = [WaveformEntry::effect(effect_id), WaveformEntry::stop()];
-        self.set_waveform_sequence_async(&sequence).await
-    }
-
-    /// Set a single predefined effect in the first sequencer slot (async version)
-    pub async fn set_single_effect_enum_async(&mut self, effect: Effect) -> Result<(), Error<E>> {
-        let sequence = [WaveformEntry::from(effect), WaveformEntry::stop()];
         self.set_waveform_sequence_async(&sequence).await
     }
 
@@ -302,6 +301,44 @@ where
         Ok(())
     }
 
+    /// Start auto-calibration process (async version)
+    pub async fn start_auto_calibration_async(&mut self) -> Result<(), Error<E>> {
+        // Set mode to auto-calibration
+        self.set_mode_async(OperatingMode::AutoCalibration).await?;
+        // Trigger calibration
+        self.go_async().await
+    }
+
+    /// Start diagnostics process (async version)
+    pub async fn start_diagnostics_async(&mut self) -> Result<(), Error<E>> {
+        // Set mode to diagnostics
+        self.set_mode_async(OperatingMode::Diagnostics).await?;
+        // Trigger diagnostics
+        self.go_async().await
+    }
+}
+
+/// Async methods only available on DRV2605 and DRV2605L variants (ROM library and audio-to-vibe).
+#[cfg(all(feature = "async", any(feature = "drv2605", feature = "drv2605l")))]
+impl<I2C, E> Drv260x<I2C>
+where
+    I2C: AsyncI2c<Error = E>,
+{
+    /// Set library selection (async version)
+    pub async fn set_library_async(&mut self, library: LibrarySelection) -> Result<(), Error<E>> {
+        self.device
+            .library_selection()
+            .modify_async(|reg| reg.set_library_sel(library))
+            .await?;
+        Ok(())
+    }
+
+    /// Set a single predefined effect in the first sequencer slot (async version)
+    pub async fn set_single_effect_enum_async(&mut self, effect: Effect) -> Result<(), Error<E>> {
+        let sequence = [WaveformEntry::from(effect), WaveformEntry::stop()];
+        self.set_waveform_sequence_async(&sequence).await
+    }
+
     /// Configure audio-to-vibe control settings (async version)
     pub async fn set_audio_to_vibe_control_async(
         &mut self,
@@ -364,21 +401,5 @@ where
             .write_async(|reg| reg.set_ath_max_drive(level))
             .await?;
         Ok(())
-    }
-
-    /// Start auto-calibration process (async version)
-    pub async fn start_auto_calibration_async(&mut self) -> Result<(), Error<E>> {
-        // Set mode to auto-calibration
-        self.set_mode_async(OperatingMode::AutoCalibration).await?;
-        // Trigger calibration
-        self.go_async().await
-    }
-
-    /// Start diagnostics process (async version)
-    pub async fn start_diagnostics_async(&mut self) -> Result<(), Error<E>> {
-        // Set mode to diagnostics
-        self.set_mode_async(OperatingMode::Diagnostics).await?;
-        // Trigger diagnostics
-        self.go_async().await
     }
 }

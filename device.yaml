@@ -19,10 +19,18 @@ Status:
       start: 1
       base: bool
       description: "Overtemperature detection flag"
+    fb_sts:
+      start: 2
+      base: bool
+      description: "Feedback status (DRV2604/DRV2605 only, reserved on L-variants)"
     diag_result:
       start: 3
       base: bool
       description: "Diagnostic result flag"
+    illegal_addr:
+      start: 4
+      base: bool
+      description: "Illegal address detection flag (DRV2604/DRV2604L only, reserved on DRV2605/DRV2605L)"
     device_id:
       start: 5
       end: 8
@@ -97,7 +105,7 @@ LibrarySelection:
       start: 0
       end: 3
       base: uint
-      description: "Waveform library selection"
+      description: "Waveform library selection (DRV2605/DRV2605L only; reserved on DRV2604/DRV2604L)"
       conversion:
         name: LibrarySelection
         Empty:
@@ -211,7 +219,7 @@ AudioToVibeControl:
   address: 0x11
   size_bits: 8
   reset_value: 0x05
-  description: "Audio-to-vibe control register"
+  description: "Audio-to-vibe control register (DRV2605/DRV2605L only)"
   fields:
     ath_filter:
       start: 0
@@ -256,7 +264,7 @@ AudioToVibeMinInputLevel:
   address: 0x12
   size_bits: 8
   reset_value: 0x19
-  description: "Audio-to-vibe minimum input level register"
+  description: "Audio-to-vibe minimum input level register (DRV2605/DRV2605L only)"
   fields:
     ath_min_input:
       start: 0
@@ -268,7 +276,7 @@ AudioToVibeMaxInputLevel:
   address: 0x13
   size_bits: 8
   reset_value: 0xFF
-  description: "Audio-to-vibe maximum input level register"
+  description: "Audio-to-vibe maximum input level register (DRV2605/DRV2605L only)"
   fields:
     ath_max_input:
       start: 0
@@ -280,7 +288,7 @@ AudioToVibeMinOutputDrive:
   address: 0x14
   size_bits: 8
   reset_value: 0x19
-  description: "Audio-to-vibe minimum output drive register"
+  description: "Audio-to-vibe minimum output drive register (DRV2605/DRV2605L only)"
   fields:
     ath_min_drive:
       start: 0
@@ -292,7 +300,7 @@ AudioToVibeMaxOutputDrive:
   address: 0x15
   size_bits: 8
   reset_value: 0xFF
-  description: "Audio-to-vibe maximum output drive register"
+  description: "Audio-to-vibe maximum output drive register (DRV2605/DRV2605L only)"
   fields:
     ath_max_drive:
       start: 0
@@ -304,7 +312,7 @@ RatedVoltage:
   address: 0x16
   size_bits: 8
   reset_value: 0x3E
-  description: "Rated voltage register"
+  description: "Rated voltage register. Default varies: 0x3F (DRV2604/DRV2605), 0x3E (DRV2604L/DRV2605L)"
   fields:
     rated_voltage:
       start: 0
@@ -316,7 +324,7 @@ OverdriveClampVoltage:
   address: 0x17
   size_bits: 8
   reset_value: 0x8C
-  description: "Overdrive clamp voltage register"
+  description: "Overdrive clamp voltage register. Default varies: 0x89 (DRV2604/DRV2605), 0x9B (DRV2604L), 0x8C (DRV2605L)"
   fields:
     od_clamp:
       start: 0
@@ -328,7 +336,7 @@ AutoCalibCompResult:
   address: 0x18
   size_bits: 8
   reset_value: 0x0C
-  description: "Auto-calibration compensation result register"
+  description: "Auto-calibration compensation result register. Default varies: 0x0D (DRV2604/DRV2605), 0x0C (DRV2604L/DRV2605L)"
   fields:
     a_cal_comp:
       start: 0
@@ -340,7 +348,7 @@ AutoCalibBackEmfResult:
   address: 0x19
   size_bits: 8
   reset_value: 0x6C
-  description: "Auto-calibration back-EMF result register"
+  description: "Auto-calibration back-EMF result register. Default varies: 0x6D (DRV2604/DRV2605), 0x6F (DRV2604L), 0x6C (DRV2605L)"
   fields:
     a_cal_bemf:
       start: 0
@@ -482,7 +490,7 @@ Control3:
   address: 0x1D
   size_bits: 8
   reset_value: 0xA0
-  description: "Control register 3"
+  description: "Control register 3. Default varies: 0x80 (DRV2604/DRV2604L), 0xA0 (DRV2605/DRV2605L)"
   fields:
     lra_open_loop:
       start: 0
@@ -566,7 +574,7 @@ Control4:
       start: 6
       end: 8
       base: uint
-      description: "Zero-crossing detection time"
+      description: "Zero-crossing detection time (DRV2604L/DRV2605L only; reserved on DRV2604/DRV2605)"
       conversion:
         name: ZeroCrossTime
         Us100:
@@ -586,7 +594,7 @@ Control5:
   address: 0x1F
   size_bits: 8
   reset_value: 0x80
-  description: "Control register 5"
+  description: "Control register 5 (DRV2604L/DRV2605L only)"
   fields:
     idiss_time:
       start: 0
@@ -630,7 +638,7 @@ LraOpenLoopPeriod:
   address: 0x20
   size_bits: 8
   reset_value: 0x33
-  description: "LRA open loop period register"
+  description: "LRA open loop period register (DRV2604L/DRV2605L only)"
   fields:
     ol_lra_period:
       start: 0
@@ -663,3 +671,39 @@ LraResonancePeriod:
       end: 8
       base: uint
       description: "LRA resonance period measurement"
+RamAddressUpperByte:
+  type: register
+  address: 0xFD
+  size_bits: 8
+  reset_value: 0x00
+  description: "RAM address upper byte (DRV2604/DRV2604L only)"
+  fields:
+    ram_addr_ub:
+      start: 0
+      end: 8
+      base: uint
+      description: "Upper byte of RAM address for waveform data access"
+RamAddressLowerByte:
+  type: register
+  address: 0xFE
+  size_bits: 8
+  reset_value: 0x00
+  description: "RAM address lower byte (DRV2604/DRV2604L only)"
+  fields:
+    ram_addr_lb:
+      start: 0
+      end: 8
+      base: uint
+      description: "Lower byte of RAM address for waveform data access"
+RamData:
+  type: register
+  address: 0xFF
+  size_bits: 8
+  reset_value: 0x00
+  description: "RAM data byte (DRV2604/DRV2604L only)"
+  fields:
+    ram_data:
+      start: 0
+      end: 8
+      base: uint
+      description: "RAM data read/write byte for waveform data access"
