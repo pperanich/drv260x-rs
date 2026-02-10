@@ -12,20 +12,19 @@ categories = ["no-std", "embedded", "asynchronous", "hardware-support"]
 
 [features]
 default = []
-async = []
+async = ["dep:embedded-hal-async"]
 drv2605 = []
 drv2605l = []
 drv2604 = []
 drv2604l = []
-defmt-03 = ["embedded-hal/defmt-03", "embedded-hal-async/defmt-03", "dep:defmt"]
+defmt-03 = ["embedded-hal/defmt-03", "dep:defmt"]
 
 [dependencies]
 cfg-if = "1.0"
 defmt = { version = "1.0", optional = true }
-device-driver = "1.0"
+device-driver = { version = "1.0", default-features = false, features = ["yaml"] }
 embedded-hal = "1.0"
-embedded-hal-async = "1.0"
-heapless = "0.8"
+embedded-hal-async = { version = "1.0", optional = true }
 num_enum = { version = "0.7", default-features = false }
 
 [dev-dependencies]

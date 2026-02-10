@@ -121,41 +121,12 @@ where
             return Err(Error::InvalidWaveform);
         }
 
-        match index {
-            0 => self.device.waveform_sequencer_0().write(|reg| {
+        self.device
+            .waveform_sequencer(index as usize)
+            .write(|reg| {
                 reg.set_wav_frm_seq(entry.value);
                 reg.set_wait(entry.is_wait);
-            })?,
-            1 => self.device.waveform_sequencer_1().write(|reg| {
-                reg.set_wav_frm_seq(entry.value);
-                reg.set_wait(entry.is_wait);
-            })?,
-            2 => self.device.waveform_sequencer_2().write(|reg| {
-                reg.set_wav_frm_seq(entry.value);
-                reg.set_wait(entry.is_wait);
-            })?,
-            3 => self.device.waveform_sequencer_3().write(|reg| {
-                reg.set_wav_frm_seq(entry.value);
-                reg.set_wait(entry.is_wait);
-            })?,
-            4 => self.device.waveform_sequencer_4().write(|reg| {
-                reg.set_wav_frm_seq(entry.value);
-                reg.set_wait(entry.is_wait);
-            })?,
-            5 => self.device.waveform_sequencer_5().write(|reg| {
-                reg.set_wav_frm_seq(entry.value);
-                reg.set_wait(entry.is_wait);
-            })?,
-            6 => self.device.waveform_sequencer_6().write(|reg| {
-                reg.set_wav_frm_seq(entry.value);
-                reg.set_wait(entry.is_wait);
-            })?,
-            7 => self.device.waveform_sequencer_7().write(|reg| {
-                reg.set_wav_frm_seq(entry.value);
-                reg.set_wait(entry.is_wait);
-            })?,
-            _ => unreachable!(),
-        }
+            })?;
 
         Ok(())
     }

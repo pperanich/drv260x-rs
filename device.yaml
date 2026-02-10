@@ -1,6 +1,8 @@
 config:
   register_address_type: u8
   default_byte_order: LE
+  default_bit_order: LSB0
+  default_register_access: RW
 Status:
   type: register
   address: 0x00
@@ -126,124 +128,15 @@ LibrarySelection:
       start: 4
       base: bool
       description: "High-impedance state control"
-WaveformSequencer0:
+WaveformSequencer:
   type: register
   address: 0x04
   size_bits: 8
+  repeat:
+    count: 8
+    stride: 1
   reset_value: 0x00
-  description: "Waveform sequencer register 0"
-  fields:
-    wav_frm_seq:
-      start: 0
-      end: 7
-      base: uint
-      description: "Waveform sequence value"
-    wait:
-      start: 7
-      base: bool
-      description: "Wait time flag"
-WaveformSequencer1:
-  type: register
-  address: 0x05
-  size_bits: 8
-  reset_value: 0x00
-  description: "Waveform sequencer register 1"
-  fields:
-    wav_frm_seq:
-      start: 0
-      end: 7
-      base: uint
-      description: "Waveform sequence value"
-    wait:
-      start: 7
-      base: bool
-      description: "Wait time flag"
-WaveformSequencer2:
-  type: register
-  address: 0x06
-  size_bits: 8
-  reset_value: 0x00
-  description: "Waveform sequencer register 2"
-  fields:
-    wav_frm_seq:
-      start: 0
-      end: 7
-      base: uint
-      description: "Waveform sequence value"
-    wait:
-      start: 7
-      base: bool
-      description: "Wait time flag"
-WaveformSequencer3:
-  type: register
-  address: 0x07
-  size_bits: 8
-  reset_value: 0x00
-  description: "Waveform sequencer register 3"
-  fields:
-    wav_frm_seq:
-      start: 0
-      end: 7
-      base: uint
-      description: "Waveform sequence value"
-    wait:
-      start: 7
-      base: bool
-      description: "Wait time flag"
-WaveformSequencer4:
-  type: register
-  address: 0x08
-  size_bits: 8
-  reset_value: 0x00
-  description: "Waveform sequencer register 4"
-  fields:
-    wav_frm_seq:
-      start: 0
-      end: 7
-      base: uint
-      description: "Waveform sequence value"
-    wait:
-      start: 7
-      base: bool
-      description: "Wait time flag"
-WaveformSequencer5:
-  type: register
-  address: 0x09
-  size_bits: 8
-  reset_value: 0x00
-  description: "Waveform sequencer register 5"
-  fields:
-    wav_frm_seq:
-      start: 0
-      end: 7
-      base: uint
-      description: "Waveform sequence value"
-    wait:
-      start: 7
-      base: bool
-      description: "Wait time flag"
-WaveformSequencer6:
-  type: register
-  address: 0x0A
-  size_bits: 8
-  reset_value: 0x00
-  description: "Waveform sequencer register 6"
-  fields:
-    wav_frm_seq:
-      start: 0
-      end: 7
-      base: uint
-      description: "Waveform sequence value"
-    wait:
-      start: 7
-      base: bool
-      description: "Wait time flag"
-WaveformSequencer7:
-  type: register
-  address: 0x0B
-  size_bits: 8
-  reset_value: 0x00
-  description: "Waveform sequencer register 7"
+  description: "Waveform sequencer register"
   fields:
     wav_frm_seq:
       start: 0
@@ -747,6 +640,7 @@ LraOpenLoopPeriod:
 VbatVoltageMonitor:
   type: register
   address: 0x21
+  access: RO
   size_bits: 8
   reset_value: 0x00
   description: "VBAT voltage monitor register"
@@ -759,6 +653,7 @@ VbatVoltageMonitor:
 LraResonancePeriod:
   type: register
   address: 0x22
+  access: RO
   size_bits: 8
   reset_value: 0x00
   description: "LRA resonance period register"

@@ -139,81 +139,13 @@ where
             return Err(Error::InvalidWaveform);
         }
 
-        match index {
-            0 => {
-                self.device
-                    .waveform_sequencer_0()
-                    .write_async(|reg| {
-                        reg.set_wav_frm_seq(entry.value);
-                        reg.set_wait(entry.is_wait);
-                    })
-                    .await?
-            }
-            1 => {
-                self.device
-                    .waveform_sequencer_1()
-                    .write_async(|reg| {
-                        reg.set_wav_frm_seq(entry.value);
-                        reg.set_wait(entry.is_wait);
-                    })
-                    .await?
-            }
-            2 => {
-                self.device
-                    .waveform_sequencer_2()
-                    .write_async(|reg| {
-                        reg.set_wav_frm_seq(entry.value);
-                        reg.set_wait(entry.is_wait);
-                    })
-                    .await?
-            }
-            3 => {
-                self.device
-                    .waveform_sequencer_3()
-                    .write_async(|reg| {
-                        reg.set_wav_frm_seq(entry.value);
-                        reg.set_wait(entry.is_wait);
-                    })
-                    .await?
-            }
-            4 => {
-                self.device
-                    .waveform_sequencer_4()
-                    .write_async(|reg| {
-                        reg.set_wav_frm_seq(entry.value);
-                        reg.set_wait(entry.is_wait);
-                    })
-                    .await?
-            }
-            5 => {
-                self.device
-                    .waveform_sequencer_5()
-                    .write_async(|reg| {
-                        reg.set_wav_frm_seq(entry.value);
-                        reg.set_wait(entry.is_wait);
-                    })
-                    .await?
-            }
-            6 => {
-                self.device
-                    .waveform_sequencer_6()
-                    .write_async(|reg| {
-                        reg.set_wav_frm_seq(entry.value);
-                        reg.set_wait(entry.is_wait);
-                    })
-                    .await?
-            }
-            7 => {
-                self.device
-                    .waveform_sequencer_7()
-                    .write_async(|reg| {
-                        reg.set_wav_frm_seq(entry.value);
-                        reg.set_wait(entry.is_wait);
-                    })
-                    .await?
-            }
-            _ => unreachable!(),
-        }
+        self.device
+            .waveform_sequencer(index as usize)
+            .write_async(|reg| {
+                reg.set_wav_frm_seq(entry.value);
+                reg.set_wait(entry.is_wait);
+            })
+            .await?;
 
         Ok(())
     }

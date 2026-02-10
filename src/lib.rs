@@ -124,7 +124,7 @@ impl<E> From<ll::DeviceInterfaceError<E>> for Error<E> {
 
 /// High-level DRV260X driver
 pub struct Drv260x<I2C> {
-    device: ll::Device<ll::DeviceInterface<I2C>>,
+    device: ll::Registers<ll::DeviceInterface<I2C>>,
     // Device state tracking
     current_mode: Option<OperatingMode>,
 }
@@ -133,13 +133,13 @@ impl<I2C> Drv260x<I2C> {
     /// Create a new DRV260X driver instance
     pub fn new(i2c: I2C) -> Self {
         Self {
-            device: ll::Device::new(ll::DeviceInterface { i2c }),
+            device: ll::Registers::new(ll::DeviceInterface { i2c }),
             current_mode: None,
         }
     }
 
     /// Get a reference to the underlying device for advanced operations
-    pub fn device(&mut self) -> &mut ll::Device<ll::DeviceInterface<I2C>> {
+    pub fn device(&mut self) -> &mut ll::Registers<ll::DeviceInterface<I2C>> {
         &mut self.device
     }
 }

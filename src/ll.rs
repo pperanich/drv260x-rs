@@ -13,11 +13,10 @@ pub enum DeviceInterfaceError<I2cError> {
     I2c(I2cError),
 }
 
-// Allow missing docs for generated device code
 #[allow(missing_docs)]
 mod device_generated {
     device_driver::create_device!(
-        device_name: Device,
+        device_name: Registers,
         manifest: "device.yaml"
     );
 }
