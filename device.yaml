@@ -3,6 +3,7 @@ config:
   default_byte_order: LE
   default_bit_order: LSB0
   default_register_access: RW
+  defmt_feature: "defmt-03"
 Status:
   type: register
   address: 0x00
